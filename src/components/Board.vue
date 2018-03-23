@@ -60,7 +60,7 @@ export default {
     }
   },
   mounted () {
-    this.getRoom()
+    this.joinRoom()
     document.addEventListener('mousemove', () => {
       this.controller()
     }, false)
@@ -123,9 +123,12 @@ export default {
       this.dropBlock()
       this.activePiece = false
     },
-    getRoom: function () {
-      roomService.getRoom(this.roomId).then(res => {
-        this.blocks = res.data.blocks
+    joinRoom: function () {
+      roomService.join({roomId: this.roomId, userId: window.localStorage.getItem('userId')}).then(res => {
+        if (res.data.userId) {
+          window.localStorage.setItem('userId', res.data.userId)
+        }
+        this.blocks = res.data.room.blocks
       })
     }
   }
