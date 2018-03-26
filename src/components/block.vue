@@ -2,13 +2,13 @@
   <div class="block"
   @click="onClick(block)"
   v-bind:style="{ top: `${block.y * GRID_SIZE}px`, left: `${block.x * GRID_SIZE}px`}">
+    <div class="block-id">{{ block._id.slice(block._id.length - 3, block._id.length) }}</div>
     <div
     class="piece"
     v-for="piece in block.pieces"
     v-bind:key="block.id + 'x' + piece.x + 'y' + piece.y"
     v-bind:style="{ left: `${(piece.x - 1) * GRID_SIZE}px`, top: `${(piece.y - 1) * GRID_SIZE}px`, background: team }"
     >
-      {{piece.id}}
     </div>
   </div>
 </template>
@@ -23,6 +23,13 @@ export default {
 
 <style lang="scss">
   $block-size: 20px;
+  .block-id {
+    position: absolute;
+    font-size: 10px;
+    z-index: 999;
+    bottom: 0;
+    left: 0px;
+  }
   .block {
     cursor: pointer;
     opacity:1;

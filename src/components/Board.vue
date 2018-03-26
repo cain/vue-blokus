@@ -2,12 +2,18 @@
   <div>
     <div class="container" :class="{ active: activePiece !== false}">
 
+      <!-- Player information -->
+      <div class="player-info">
+        ID: {{ player.id }} <br />
+        Team: {{ player.team }}
+      </div>
+
       <!-- Click Overlay -->
       <div class="click-overlay" v-if="activePiece" @click="unselect()">
       </div>
 
       <!-- Board -->
-      <div class="board" :style="{ top: `${gridCords.y * GRID_SIZE}px`, left: `${gridCords.x * GRID_SIZE}px` }">
+      <div class="board" :style="{ top: `${3 * GRID_SIZE}px`, left: `${3 * GRID_SIZE}px` }">
         <div v-for="row in rows" v-bind:key="row" class="row">
           <div v-for="col in cols" class="grid" v-bind:key="col">
           </div>
@@ -56,7 +62,8 @@ export default {
       cols: Array.apply(null, Array(20)).map(function (x, i) { return i }),
       activePiece: false,
       board: [],
-      gridCords: {x: 0, y: 0}
+      gridCords: {x: 0, y: 0},
+      player: {}
     }
   },
   mounted () {
@@ -84,7 +91,7 @@ export default {
         // Set selectedBlock axis
         activeBlock.x = x
         activeBlock.y = y
-        this.$socket.emit('block_move', {block: activeBlock})
+        this.$socket.emit('block_move', {block: activeBlock, roomId: this.roomId, userId: window.localStorage.getItem('userId')})
       }
     },
     moveBlock: function (block) {
@@ -120,16 +127,26 @@ export default {
       }
     },
     unselect: function () {
+      this.checkIfValid()
       this.dropBlock()
       this.activePiece = false
     },
     joinRoom: function () {
       roomService.join({roomId: this.roomId, userId: window.localStorage.getItem('userId')}).then(res => {
-        if (res.data.userId) {
-          window.localStorage.setItem('userId', res.data.userId)
+        window.localStorage.setItem('userId', res.data.player._id)
+        this.player = {
+          id: res.data.player._id,
+          team: res.data.player.team
         }
         this.blocks = res.data.room.blocks
       })
+    },
+    checkIfValid: function () {
+      const block = this.activePiece
+
+      // blocks around active block
+      const blocksAround = this.blocks.filter((x) => (x.x >= block.x && x.x < block.x + 5) && (x.y >= block.y && x.y < block.y + 5) && x._id !== block._id)
+      console.log(blocksAround)
     }
   }
 }
@@ -138,8 +155,9 @@ export default {
 <style lang="scss" scoped >
 $block-size: 20px;
 .container {
-  position: relative;
-  min-height: 100%;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
 }
 .grid {
   min-width: $block-size;
@@ -173,6 +191,15 @@ $block-size: 20px;
   .row:first-child .grid:last-child {
     background: rgba(0, 0, 255, 0.45);
   }
+}
+
+.player-info {
+  position: absolute;
+  right: 0;
+  text-align: right;
+  bottom: 0px;
+  text-transform: capitalize;
+  font-size: 12px;
 }
 
 .dragging .piece, .block:hover {
