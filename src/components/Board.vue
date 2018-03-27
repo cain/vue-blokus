@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="container" :class="{ active: activePiece !== false}">
+    <div class="container" :class="{ active: activeBlock !== false}">
 
       <!-- Player information -->
       <div class="player-info">
@@ -9,7 +9,7 @@
       </div>
 
       <!-- Click Overlay -->
-      <div class="click-overlay" v-if="activePiece" @click="unselect()">
+      <div class="click-overlay" v-if="activeBlock" @click="unselect()">
       </div>
 
       <!-- Board -->
@@ -60,7 +60,7 @@ export default {
       blocks: [],
       rows: Array.apply(null, Array(20)).map(function (x, i) { return i }),
       cols: Array.apply(null, Array(20)).map(function (x, i) { return i }),
-      activePiece: false,
+      activeBlock: false,
       board: [],
       gridCords: {x: 0, y: 0},
       player: {}
@@ -78,12 +78,12 @@ export default {
   },
   methods: {
     controller: function () {
-      if (this.activePiece) {
+      if (this.activeBlock) {
         // Calculate grid positioning
         const mouse = this.mousePosition()
         const x = Math.round(mouse.x / config.GRID_SIZE)
         const y = Math.round(mouse.y / config.GRID_SIZE)
-        const activeBlock = this.blocks.find(x => x._id === this.activePiece._id)
+        const activeBlock = this.blocks.find(x => x._id === this.activeBlock._id)
         // Trigger ONLY on grid change
         if (x === activeBlock.x && y === activeBlock.y) {
           return
@@ -103,17 +103,13 @@ export default {
       return cursorPosition()
     },
     getActiveElement: function () {
-      return this.$refs[this.activePiece._id + this.activePiece.team][0].$el
-    },
-    dropBlock: function () {
-      // const el = this.getActiveElement()
-      // const blockGrid = this.getBlockGrid(el)
+      return this.$refs[this.activeBlock._id + this.activeBlock.team][0].$el
     },
     selectPiece: function (block) {
-      if (block._id === this.activePiece._id) {
+      if (block._id === this.activeBlock._id) {
         this.unselect()
       } else {
-        this.activePiece = block
+        this.activeBlock = block
         this.$socket.emit('block_select', {block})
       }
     },
@@ -127,9 +123,8 @@ export default {
       }
     },
     unselect: function () {
-      this.checkIfValid()
-      this.dropBlock()
-      this.activePiece = false
+      this.findNearbyBlocks(this.activeBlock)
+      this.activeBlock = false
     },
     joinRoom: function () {
       roomService.join({roomId: this.roomId, userId: window.localStorage.getItem('userId')}).then(res => {
@@ -141,13 +136,24 @@ export default {
         this.blocks = res.data.room.blocks
       })
     },
-    checkIfValid: function () {
-      const block = this.activePiece
+    findNearbyBlocks: function (block) {
+      const area = {
+        c1: [block.x - 5, block.y - 5],
+        c2: [block.x + block.grid.x + 5, block.y + block.grid.y + 5]
+      }
 
       // blocks around active block
-      const blocksAround = this.blocks.filter((x) => (x.x >= block.x && x.x < block.x + 5) && (x.y >= block.y && x.y < block.y + 5) && x._id !== block._id)
+      const blocksAround = this.blocks.filter(
+        (b) =>
+          (b.x + b.grid.x + 5 > area.c1[0] && b.x - 5 < area.c2[0]) &&
+          (b.y + b.grid.y + 5 > area.c1[1] && b.y - 5 < area.c2[1]) &&
+          b._id !== block._id)
       console.log(blocksAround)
+      return blocksAround
     }
+  },
+  computed: {
+
   }
 }
 </script>
@@ -194,7 +200,7 @@ $block-size: 20px;
 }
 
 .player-info {
-  position: absolute;
+  position: fixed;
   right: 0;
   text-align: right;
   bottom: 0px;

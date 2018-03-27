@@ -3,11 +3,12 @@
   @click="onClick(block)"
   v-bind:style="{ top: `${block.y * GRID_SIZE}px`, left: `${block.x * GRID_SIZE}px`}">
     <div class="block-id">{{ block._id.slice(block._id.length - 3, block._id.length) }}</div>
+    <div class="helper" v-bind:style="{ width: `${(block.grid.x + 10) * GRID_SIZE}px`, height: `${(block.grid.y + 10) * GRID_SIZE}px`, left: `-${((block.grid.x + 10) * GRID_SIZE) / 2 - ((block.grid.x / 2) * GRID_SIZE)}px`, top: `-${((block.grid.y + 5) * GRID_SIZE)}px`}"></div>
     <div
     class="piece"
     v-for="piece in block.pieces"
     v-bind:key="block.id + 'x' + piece.x + 'y' + piece.y"
-    v-bind:style="{ left: `${(piece.x - 1) * GRID_SIZE}px`, top: `${(piece.y - 1) * GRID_SIZE}px`, background: team }"
+    v-bind:style="{ left: `${(piece.x - 1) * GRID_SIZE}px`, bottom: `${(piece.y - 1) * GRID_SIZE}px`, background: team }"
     >
     </div>
   </div>
@@ -23,11 +24,17 @@ export default {
 
 <style lang="scss">
   $block-size: 20px;
+  .helper {
+    position: absolute;
+    outline: 1px solid rgba(255,0,0,0.2);
+    background-size: 20px 20px;
+    // background-image: linear-gradient(to right, #e7e7e7 1px, transparent 1px), linear-gradient(to bottom, #e7e7e7 1px, transparent 1px);
+  }
   .block-id {
     position: absolute;
     font-size: 10px;
     z-index: 999;
-    bottom: 0;
+    bottom: -20px;
     left: 0px;
   }
   .block {
