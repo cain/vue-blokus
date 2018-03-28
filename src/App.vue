@@ -15,7 +15,7 @@ body{
   margin: 0px;
 }
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Source Code Pro", "monaco", "PT Mono", "Courier", monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

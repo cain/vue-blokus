@@ -131,7 +131,6 @@ export default {
     unselect: function () {
       // find blocks around selected block
       const blocksAround = this.findNearbyBlocks(this.activeBlock)
-      console.log(this.isPlacementValid(this.activeBlock, blocksAround))
       // is the placement valid
       if (this.isPlacementValid(this.activeBlock, blocksAround)) {
         this.activeBlock = false

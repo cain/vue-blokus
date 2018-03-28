@@ -50,8 +50,8 @@ export default {
     font-size: 8px;
     max-width: $block-size;
     position: absolute;
-    outline: 1px solid rgba(0,0,0,1);
-    outline-offset: -1px;
+    outline: 2px solid #0000004a;
+    outline-offset: -3px;
     box-shadow: 0px 0px 21px -4px rgba(0,0,0,1);
   }
 </style>
