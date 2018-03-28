@@ -3,7 +3,7 @@
   @click="onClick(block)"
   v-bind:style="{ top: `${block.y * GRID_SIZE}px`, left: `${block.x * GRID_SIZE}px`}">
     <div class="block-id">{{ block._id.slice(block._id.length - 3, block._id.length) }}</div>
-    <div class="helper" v-bind:style="{ width: `${(block.grid.x + 10) * GRID_SIZE}px`, height: `${(block.grid.y + 10) * GRID_SIZE}px`, left: `-${((block.grid.x + 10) * GRID_SIZE) / 2 - ((block.grid.x / 2) * GRID_SIZE)}px`, top: `-${((block.grid.y + 5) * GRID_SIZE)}px`}"></div>
+    <div class="helper" v-bind:style="{ width: `${(block.grid.x + 2) * GRID_SIZE}px`, height: `${(block.grid.y + 2) * GRID_SIZE}px`, left: `-${((block.grid.x + 2) * GRID_SIZE) / 2 - ((block.grid.x / 2) * GRID_SIZE)}px`, top: `-${((block.grid.y + 1) * GRID_SIZE)}px`}"></div>
     <div
     class="piece"
     v-for="piece in block.pieces"

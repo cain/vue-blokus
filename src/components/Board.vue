@@ -4,7 +4,7 @@
 
       <!-- Player information -->
       <div class="player-info">
-        ID: {{ player.id }} <br />
+        Player ID: {{ player.id }} <br />
         Team: {{ player.team }}
       </div>
 
@@ -39,6 +39,9 @@ import cursorPosition from '../utilities/cursorPosition'
 import roomService from '../services/room.service'
 import block from './block'
 import config from '../config'
+const intersectionWith = require('lodash/intersectionWith')
+const isEqual = require('lodash/isEqual')
+
 export default {
   name: 'Board',
   props: ['roomId'],
@@ -96,6 +99,9 @@ export default {
     },
     moveBlock: function (block) {
       const blockToMove = this.blocks.find(x => x._id === block._id)
+      if (blockToMove.x === block.x && blockToMove.y === block.y) {
+        return
+      }
       blockToMove.x = block.x
       blockToMove.y = block.y
     },
@@ -123,8 +129,13 @@ export default {
       }
     },
     unselect: function () {
-      this.findNearbyBlocks(this.activeBlock)
-      this.activeBlock = false
+      // find blocks around selected block
+      const blocksAround = this.findNearbyBlocks(this.activeBlock)
+      console.log(this.isPlacementValid(this.activeBlock, blocksAround))
+      // is the placement valid
+      if (this.isPlacementValid(this.activeBlock, blocksAround)) {
+        this.activeBlock = false
+      }
     },
     joinRoom: function () {
       roomService.join({roomId: this.roomId, userId: window.localStorage.getItem('userId')}).then(res => {
@@ -137,19 +148,33 @@ export default {
       })
     },
     findNearbyBlocks: function (block) {
+      const areaRadius = 1
       const area = {
-        c1: [block.x - 5, block.y - 5],
-        c2: [block.x + block.grid.x + 5, block.y + block.grid.y + 5]
+        c1: [block.x - areaRadius, block.y - areaRadius],
+        c2: [block.x + block.grid.x + areaRadius, block.y + block.grid.y + areaRadius]
       }
 
       // blocks around active block
       const blocksAround = this.blocks.filter(
         (b) =>
-          (b.x + b.grid.x + 5 > area.c1[0] && b.x - 5 < area.c2[0]) &&
-          (b.y + b.grid.y + 5 > area.c1[1] && b.y - 5 < area.c2[1]) &&
+          (b.x + b.grid.x + areaRadius > area.c1[0] && b.x - areaRadius < area.c2[0]) &&
+          (b.y + b.grid.y + areaRadius > area.c1[1] && b.y - areaRadius < area.c2[1]) &&
           b._id !== block._id)
-      console.log(blocksAround)
       return blocksAround
+    },
+    isPlacementValid: function (selectedBlock, blocksAround) {
+      const arr = []
+      const sBpieces = selectedBlock.pieces.map(a =>
+        ({ x: a.x + selectedBlock.x, y: selectedBlock.y - a.y + 1 }))
+
+      blocksAround.forEach(block => {
+        // times each piece by the grid location to get each piece location
+        const pieces1 = block.pieces.map(a =>
+          ({ x: a.x + block.x, y: block.y - a.y + 1 }))
+        const invalidPieces = intersectionWith(sBpieces, pieces1, isEqual)
+        if (invalidPieces.length) arr.push(invalidPieces)
+      })
+      return arr.length === 0
     }
   },
   computed: {
