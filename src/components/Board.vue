@@ -114,7 +114,7 @@ export default {
     selectPiece: function (block) {
       if (block._id === this.activeBlock._id) {
         this.unselect()
-      } else if (!this.activeBlock){
+      } else if (!this.activeBlock) {
         this.activeBlock = block
         this.$socket.emit('block_select', {block})
       }
