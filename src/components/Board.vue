@@ -114,7 +114,7 @@ export default {
     selectPiece: function (block) {
       if (block._id === this.activeBlock._id) {
         this.unselect()
-      } else {
+      } else if (!this.activeBlock){
         this.activeBlock = block
         this.$socket.emit('block_select', {block})
       }
@@ -153,8 +153,6 @@ export default {
         c1: [block.x - areaRadius, block.y - areaRadius],
         c2: [block.x + block.grid.x + areaRadius, block.y + block.grid.y + areaRadius]
       }
-
-      // blocks around active block
       const blocksAround = this.blocks.filter(
         (b) =>
           (b.x + b.grid.x + areaRadius > area.c1[0] && b.x - areaRadius < area.c2[0]) &&
@@ -163,18 +161,21 @@ export default {
       return blocksAround
     },
     isPlacementValid: function (selectedBlock, blocksAround) {
-      const arr = []
-      const sBpieces = selectedBlock.pieces.map(a =>
+      const invalidPieces = []
+      const pieces = selectedBlock.pieces.map(a =>
         ({ x: a.x + selectedBlock.x, y: selectedBlock.y - a.y + 1 }))
 
       blocksAround.forEach(block => {
-        // times each piece by the grid location to get each piece location
-        const pieces1 = block.pieces.map(a =>
-          ({ x: a.x + block.x, y: block.y - a.y + 1 }))
-        const invalidPieces = intersectionWith(sBpieces, pieces1, isEqual)
-        if (invalidPieces.length) arr.push(invalidPieces)
+        invalidPieces.push(
+          ...intersectionWith(
+            pieces,
+            block.pieces.map(a =>
+              ({ x: a.x + block.x, y: block.y - a.y + 1 })),
+            isEqual
+          ))
       })
-      return arr.length === 0
+
+      return invalidPieces.length === 0
     }
   },
   computed: {
