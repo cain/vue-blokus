@@ -13,6 +13,7 @@ export default {
 <style>
 body{
   margin: 0px;
+  overflow: hidden;
 }
 #app {
   font-family: "Source Code Pro", "monaco", "PT Mono", "Courier", monospace;

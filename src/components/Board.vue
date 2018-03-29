@@ -74,10 +74,18 @@ export default {
     document.addEventListener('mousemove', () => {
       this.controller()
     }, false)
-    this.gridCords = {
-      x: Math.round(Math.round(Math.round(window.innerWidth / config.GRID_SIZE) / 2 - 10)),
-      y: Math.round(Math.round(Math.round(window.innerHeight / config.GRID_SIZE) / 2 - 10))
-    }
+
+    document.addEventListener('keydown', (event) => {
+      if (this.activeBlock && (event.keyCode === 39 || event.keyCode === 37)) {
+        this.rotateBlock(this.activeBlock)
+      } else if (this.activeBlock && (event.keyCode === 38 || event.keyCode === 40)) {
+        this.flipBlock(this.activeBlock)
+      }
+    })
+    // this.gridCords = {
+    //   x: Math.round(Math.round(Math.round(window.innerWidth / config.GRID_SIZE) / 2 - 10)),
+    //   y: Math.round(Math.round(Math.round(window.innerHeight / config.GRID_SIZE) / 2 - 10))
+    // }
   },
   methods: {
     controller: function () {
@@ -173,8 +181,23 @@ export default {
             isEqual
           ))
       })
-
       return invalidPieces.length === 0
+    },
+    rotateBlock: function (selectedBlock) {
+      const rotateBlock = this.blocks.find(x => x._id === selectedBlock._id)
+      console.log(rotateBlock)
+      rotateBlock.pieces = rotateBlock.pieces.map((p) => ({
+        x: -p.y + rotateBlock.grid.y + 1,
+        y: p.x
+      }))
+    },
+    flipBlock: function (selectedBlock) {
+      const rotateBlock = this.blocks.find(x => x._id === selectedBlock._id)
+      console.log(rotateBlock)
+      rotateBlock.pieces = rotateBlock.pieces.map((p) => ({
+        x: -p.y + rotateBlock.grid.x + 1,
+        y: -p.x + rotateBlock.grid.x + 1
+      }))
     }
   },
   computed: {
