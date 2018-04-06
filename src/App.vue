@@ -12,16 +12,16 @@ export default {
 
 <style>
 body{
-  margin: 0px;
-  background-color: transparent;
-  background-size: 20px 20px;
-  background-image: linear-gradient(to right, #e7e7e7 1px, transparent 1px), linear-gradient(to bottom, #e7e7e7 1px, transparent 1px);
+  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
 }
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+.text-center {
   text-align: center;
-  color: #2c3e50;
+}
+.text-right {
+  text-align: right;
 }
 </style>
