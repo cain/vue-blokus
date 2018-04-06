@@ -12,14 +12,16 @@ export default {
 
 <style>
 body{
-  margin: 0px;
-  overflow: hidden;
+  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
 }
 #app {
-  font-family: "Source Code Pro", "monaco", "PT Mono", "Courier", monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+.text-center {
   text-align: center;
-  color: #2c3e50;
+}
+.text-right {
+  text-align: right;
 }
 </style>

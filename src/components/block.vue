@@ -8,17 +8,27 @@
     class="piece"
     v-for="piece in block.pieces"
     v-bind:key="block.id + 'x' + piece.x + 'y' + piece.y"
-    v-bind:style="{ left: `${(piece.x - 1) * GRID_SIZE}px`, bottom: `${(piece.y - 1) * GRID_SIZE}px`, background: team }"
+    v-bind:style="{ left: `${(piece.x - 1) * GRID_SIZE}px`, bottom: `${(piece.y - 1) * GRID_SIZE}px`, background: teamColour }"
     >
     </div>
   </div>
 </template>
 
 <script>
-
+const teamColours = {
+  'RED': '#F56C6C',
+  'BLUE': '#409EFF',
+  'YELLOW': '#E6A23C',
+  'GREEN': '#67C23A'
+}
 export default {
   name: 'block',
-  props: ['block', 'GRID_SIZE', 'onClick', 'team']
+  props: ['block', 'GRID_SIZE', 'onClick', 'team'],
+  computed: {
+    teamColour: function () {
+      return teamColours[this.team]
+    }
+  }
 }
 </script>
 
@@ -45,13 +55,12 @@ export default {
   .piece {
     min-width: $block-size;
     min-height: $block-size;
-    background: red;
     color: white;
     font-size: 8px;
     max-width: $block-size;
     position: absolute;
-    outline: 2px solid #0000004a;
-    outline-offset: -3px;
-    box-shadow: 0px 0px 21px -4px rgba(0,0,0,1);
+    outline: 1px solid rgba(255, 255, 255, 0.2);
+    outline-offset: -2px;
+    // box-shadow: 0px 0px 21px -4px rgba(0,0,0,1);
   }
 </style>

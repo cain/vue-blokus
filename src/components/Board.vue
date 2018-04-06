@@ -65,7 +65,6 @@ export default {
       cols: Array.apply(null, Array(20)).map(function (x, i) { return i }),
       activeBlock: false,
       board: [],
-      gridCords: {x: 0, y: 0},
       player: {}
     }
   },
@@ -82,10 +81,6 @@ export default {
         this.flipBlock(this.activeBlock)
       }
     })
-    // this.gridCords = {
-    //   x: Math.round(Math.round(Math.round(window.innerWidth / config.GRID_SIZE) / 2 - 10)),
-    //   y: Math.round(Math.round(Math.round(window.innerHeight / config.GRID_SIZE) / 2 - 10))
-    // }
   },
   methods: {
     controller: function () {
@@ -142,6 +137,12 @@ export default {
       // is the placement valid
       if (this.isPlacementValid(this.activeBlock, blocksAround)) {
         this.activeBlock = false
+      } else {
+        this.$notify({
+          title: 'Warning',
+          message: `Your block is ontop another block`,
+          type: 'warning'
+        })
       }
     },
     joinRoom: function () {
@@ -185,7 +186,6 @@ export default {
     },
     rotateBlock: function (selectedBlock) {
       const rotateBlock = this.blocks.find(x => x._id === selectedBlock._id)
-      console.log(rotateBlock)
       rotateBlock.pieces = rotateBlock.pieces.map((p) => ({
         x: -p.y + rotateBlock.grid.y + 1,
         y: p.x
@@ -193,7 +193,6 @@ export default {
     },
     flipBlock: function (selectedBlock) {
       const rotateBlock = this.blocks.find(x => x._id === selectedBlock._id)
-      console.log(rotateBlock)
       rotateBlock.pieces = rotateBlock.pieces.map((p) => ({
         x: -p.y + rotateBlock.grid.x + 1,
         y: -p.x + rotateBlock.grid.x + 1
@@ -225,7 +224,7 @@ $block-size: 20px;
 }
 
 .board {
-  outline: 1px solid grey;
+  outline: 1px solid #ebebeb;
   outline-offset: -1px;
   box-shadow: 0px 0px 21px -4px rgba(168, 168, 168, 0.75);
   background-size: 20px 20px;

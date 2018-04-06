@@ -1,20 +1,60 @@
 <template>
-  <div class="room-container">
-    <h1>
-      Blokus
-    </h1>
-
-    <div class="">
-      <input v-model="roomInput" type="text" name="room" value="" placeholder="Enter a room id" />
-      <button type="button" @click="joinRoom" name="button" :disabled="roomInput.length == 0">Go!</button>
-      <small> Or </small>
-      <button type="button" name="button" @click="createRoom">Create Room</button>
-      <br />
-      <small>{{responseMessage}}</small>
-
-    </div>
-    <small>eg: "5aa89329ed45ec7a4a1a8205"</small>
-  </div>
+    <el-row>
+      <el-row>
+        <el-col class="text-center" :span="24">
+          <small style="color: #606262; margin-top: 100px; width: 100%">Made by <a target="_blank" href="https://github.com/cainhall">cain</a>, source code <a target="_blank" href="https://github.com/cainhall/vue-blokus">github</a></small>
+          <h2>
+            Blokus
+          </h2>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="16" :offset="4">
+          <el-table
+          :data="rooms"
+          style="">
+            <el-table-column
+              label="Name">
+              <template slot-scope="scope">
+                {{scope.row._id}}
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="Players">
+              <template slot-scope="scope">
+                <i class="el-icon-view"></i>
+                {{scope.row.players.length}}/4 Players
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="Last Update">
+              <template slot-scope="scope">
+                <i class="el-icon-time"></i>
+                5 minutes ago
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="">
+              <template slot-scope="scope">
+                <el-button
+                  size="mini"
+                  type="primary"
+                  style="float: right;"
+                  @click="joinRoom(scope.row._id)">Join</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-col>
+      </el-row>
+      <el-row class="text-center">
+        <el-col :span="24">
+          <p>OR</p>
+          <el-button @click="createRoom" size="mini">Create Room</el-button>
+        </el-col>
+     </el-row>
+     <el-footer class="text-center">
+     </el-footer>
+    </el-row>
 </template>
 
 <script>
@@ -24,20 +64,29 @@ export default {
   data () {
     return {
       roomInput: '',
-      responseMessage: ''
+      responseMessage: '',
+      rooms: []
     }
   },
+  mounted () {
+    this.getRooms()
+  },
   methods: {
-    joinRoom: function () {
-      RoomService.join(this.roomInput).then(res => {
-        window.localStorage.setItem('userId', res.data.userId)
+    joinRoom: function (id) {
+      RoomService.join({roomId: id, userId: window.localStorage.getItem('userId')}).then(res => {
+        window.localStorage.setItem('userId', res.data.player._id)
         this.$router.push({ path: `/room/${res.data.room._id}` })
-      }).catch(e => { console.log(e) })
+      }).catch(e => { this.responseMessage = {...e}.response.data.message })
     },
     createRoom: function () {
       RoomService.create().then(res => {
         window.localStorage.setItem('userId', res.data.userId)
         this.$router.push({ path: `/room/${res.data.room._id}` })
+      }).catch(e => { this.responseMessage = {...e}.response.data.message })
+    },
+    getRooms: function () {
+      RoomService.getAll().then(res => {
+        this.rooms = res.data.rooms
       }).catch(e => { this.responseMessage = {...e}.response.data.message })
     }
   }
@@ -45,11 +94,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.room-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  height: 100vh
-}
 </style>
