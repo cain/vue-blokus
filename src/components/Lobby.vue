@@ -16,7 +16,7 @@
             <el-table-column
               label="Name">
               <template slot-scope="scope">
-                {{scope.row._id}}
+                {{scope.row.name}}
               </template>
             </el-table-column>
             <el-table-column
@@ -30,7 +30,7 @@
               label="Last Update">
               <template slot-scope="scope">
                 <i class="el-icon-time"></i>
-                5 minutes ago
+                {{ fromAgo(scope.row.updatedAt) }} ago
               </template>
             </el-table-column>
             <el-table-column
@@ -49,7 +49,7 @@
       <el-row class="text-center">
         <el-col :span="24">
           <p>OR</p>
-          <el-button @click="createRoom" size="mini">Create Room</el-button>
+          <el-button @click="createRoomPrompt" size="mini">Create Room</el-button>
         </el-col>
      </el-row>
      <el-footer class="text-center">
@@ -59,12 +59,12 @@
 
 <script>
 import RoomService from '../services/room.service'
+import { setItem, getItem } from '../utilities/localStorage'
+import { distanceInWordsStrict } from 'date-fns'
 
 export default {
   data () {
     return {
-      roomInput: '',
-      responseMessage: '',
       rooms: []
     }
   },
@@ -72,22 +72,45 @@ export default {
     this.getRooms()
   },
   methods: {
-    joinRoom: function (id) {
-      RoomService.join({roomId: id, userId: window.localStorage.getItem('userId')}).then(res => {
-        window.localStorage.setItem('userId', res.data.player._id)
-        this.$router.push({ path: `/room/${res.data.room._id}` })
-      }).catch(e => { this.responseMessage = {...e}.response.data.message })
+    fromAgo: function (date) {
+      return distanceInWordsStrict(date, new Date())
     },
-    createRoom: function () {
-      RoomService.create().then(res => {
-        window.localStorage.setItem('userId', res.data.userId)
+    joinRoom: function (id) {
+      RoomService.join({roomId: id, userId: getItem('userId')}).then(res => {
+        setItem('userId', res.data.player._id)
+        this.$message({ type: 'success', message: 'You have joined a room' })
         this.$router.push({ path: `/room/${res.data.room._id}` })
-      }).catch(e => { this.responseMessage = {...e}.response.data.message })
+      }).catch(e => {
+        this.$message({ type: 'error', message: e })
+      })
+    },
+    createRoom: function (roomName) {
+      RoomService.create(roomName).then(res => {
+        setItem('userId', res.data.userId)
+        this.$router.push({ path: `/room/${res.data.room._id}` })
+        this.$message({
+          type: 'success',
+          message: 'You have created a room'
+        })
+      }).catch(e => {
+        this.$message({ type: 'error', message: e })
+      })
     },
     getRooms: function () {
       RoomService.getAll().then(res => {
         this.rooms = res.data.rooms
-      }).catch(e => { this.responseMessage = {...e}.response.data.message })
+      }).catch(e => {
+        this.$message({ type: 'error', message: e })
+      })
+    },
+    createRoomPrompt: function () {
+      this.$prompt('', 'Enter a room name', {
+        confirmButtonText: 'OK',
+        center: true,
+        cancelButtonText: 'Cancel'
+      }).then(res => {
+        this.createRoom(res.value)
+      })
     }
   }
 }
