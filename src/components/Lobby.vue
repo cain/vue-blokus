@@ -2,7 +2,7 @@
     <el-row>
       <el-row>
         <el-col class="text-center" :span="24">
-          <small style="color: #606262; margin-top: 100px; width: 100%">Made by <a target="_blank" href="https://github.com/cainhall">cain</a>, source code <a target="_blank" href="https://github.com/cainhall/vue-blokus">github</a></small>
+          <small style="color: #606262; margin-top: 100px; width: 100%">Made by <a target="_blank" href="https://github.com/cain">cain</a>, source code <a target="_blank" href="https://github.com/cain/vue-blokus">github</a></small>
           <h2>
             Blokus
           </h2>
