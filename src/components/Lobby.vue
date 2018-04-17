@@ -2,17 +2,19 @@
     <el-row>
       <el-row>
         <el-col class="text-center" :span="24">
-          <small style="color: #606262; margin-top: 100px; width: 100%">Made by <a target="_blank" href="https://github.com/cain">cain</a>, source code <a target="_blank" href="https://github.com/cain/vue-blokus">github</a></small>
+          <div class="logo">
+            <img draggable="false" width="20px" class="emoji" alt="🅱" src="https://twemoji.maxcdn.com/2/72x72/1f171.png">
+          </div>
           <h2>
             Blokus
           </h2>
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="16" :offset="4">
+        <el-col :span="24">
           <el-table
           :data="rooms"
-          style="">
+          style="max-width: 700px; margin:auto;">
             <el-table-column
               label="Name">
               <template slot-scope="scope">
@@ -50,6 +52,9 @@
         <el-col :span="24">
           <p>OR</p>
           <el-button @click="createRoomPrompt" size="mini">Create Room</el-button>
+        </el-col>
+        <el-col style="margin-top: 18px;" :span="24">
+          <small style="color: #606262; margin-top: 100px; width: 100%">Made by <a target="_blank" href="https://github.com/cain">cain</a>, source code <a target="_blank" href="https://github.com/cain/vue-blokus">github</a></small>
         </el-col>
      </el-row>
      <el-footer class="text-center">
@@ -117,4 +122,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.logo {
+    font-weight: 800;
+    margin: auto;
+    margin-top: 18px;
+}
 </style>

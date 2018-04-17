@@ -208,8 +208,8 @@ export default {
 <style lang="scss" scoped >
 $block-size: 20px;
 .container {
-    height: 100vh;
-    width: 100vw;
+    height: 2000px;
+    width: 2000px;
     position: relative;
 }
 .grid {

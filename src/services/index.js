@@ -5,9 +5,7 @@ export default function (type, route, data) {
   return new Promise(function (resolve, reject) {
     axios[type](API_URL + route, data)
       .then(res => resolve(res))
-      .catch(err => {
-        return reject({ ...err }.response.data.message)
-      })
+      .catch(err => reject({ ...err }.response.data.message))
   })
 }
 
