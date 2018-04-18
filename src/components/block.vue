@@ -3,9 +3,9 @@
   class="block"
   :class="{ [team]: true }"
   @click="onClick(block)"
-  v-bind:style="{ top: `${block.y * GRID_SIZE}px`, left: `${block.x * GRID_SIZE}px`}">
+  v-bind:style="blockPosition">
     <div class="block-id">{{ block._id.slice(block._id.length - 3, block._id.length) }}</div>
-    <!-- <div class="helper" v-bind:style="{ width: `${(block.grid.x + 2) * GRID_SIZE}px`, height: `${(block.grid.y + 2) * GRID_SIZE}px`, left: `-${((block.grid.x + 2) * GRID_SIZE) / 2 - ((block.grid.x / 2) * GRID_SIZE)}px`, top: `-${((block.grid.y + 1) * GRID_SIZE)}px`}"></div> -->
+    <div class="helper" v-bind:style="helperStyling"></div>
       <div
       class="piece"
       v-for="piece in block.pieces"
@@ -19,7 +19,24 @@
 <script>
 export default {
   name: 'block',
-  props: ['block', 'GRID_SIZE', 'onClick', 'team']
+  props: ['block', 'GRID_SIZE', 'onClick', 'team'],
+  computed: {
+    blockPosition: function () {
+      return {
+        top: `${this.block.y * this.GRID_SIZE}px`,
+        left: `${this.block.x * this.GRID_SIZE}px`
+      }
+    },
+    helperStyling: function () {
+      const { x, y } = this.block.grid
+      return {
+        width: `${(x + 2) * this.GRID_SIZE}px`,
+        height: `${(y + 2) * this.GRID_SIZE}px`,
+        left: `-${((x + 2) * this.GRID_SIZE) / 2 - ((x / 2) * this.GRID_SIZE)}px`,
+        top: `-${((y + 1) * this.GRID_SIZE)}px`
+      }
+    }
+  }
 }
 </script>
 

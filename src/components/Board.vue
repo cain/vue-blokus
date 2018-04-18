@@ -5,7 +5,8 @@
       <!-- Player information -->
       <div class="player-info">
         Player ID: {{ player.id }} <br />
-        Team: {{ player.team }}
+        Team: {{ player.team }} <br />
+        <button @click="leaveRoom()">leave game</button>
       </div>
 
       <!-- Click Overlay -->
@@ -35,12 +36,12 @@
 </template>
 
 <script>
+import intersectionWith from 'lodash/intersectionWith'
+import isEqual from 'lodash/isEqual'
 import cursorPosition from '../utilities/cursorPosition'
 import roomService from '../services/room.service'
 import block from './block'
 import config from '../config'
-const intersectionWith = require('lodash/intersectionWith')
-const isEqual = require('lodash/isEqual')
 
 export default {
   name: 'Board',
@@ -64,26 +65,27 @@ export default {
       rows: Array.apply(null, Array(20)).map(function (x, i) { return i }),
       cols: Array.apply(null, Array(20)).map(function (x, i) { return i }),
       activeBlock: false,
-      board: [],
       player: {}
     }
   },
   mounted () {
     this.joinRoom()
     document.addEventListener('mousemove', () => {
-      this.controller()
+      this.mouseController()
     }, false)
 
     document.addEventListener('keydown', (event) => {
       if (this.activeBlock && (event.keyCode === 39 || event.keyCode === 37)) {
+        console.log('rotate')
         this.rotateBlock(this.activeBlock)
       } else if (this.activeBlock && (event.keyCode === 38 || event.keyCode === 40)) {
+        console.log('flip')
         this.flipBlock(this.activeBlock)
       }
     })
   },
   methods: {
-    controller: function () {
+    mouseController: function () {
       if (this.activeBlock) {
         // Calculate grid positioning
         const mouse = this.mousePosition()
@@ -125,11 +127,14 @@ export default {
     getBlockGrid: function (el) {
       el = el.getBoundingClientRect()
       return {
-        left: (el.left + window.scrollX) / config.GRID_SIZE,
-        right: (el.right) / config.GRID_SIZE,
-        bottom: (el.bottom) / config.GRID_SIZE,
-        top: (el.top + window.scrollY) / config.GRID_SIZE
+        left: this.divideByGrid(el.left + window.scrollX),
+        right: this.divideByGrid(el.right),
+        bottom: this.divideByGrid(el.bottom),
+        top: this.divideByGrid(el.top + window.scrollY)
       }
+    },
+    divideByGrid: function (val) {
+      return val / config.GRID_SIZE
     },
     unselect: function () {
       // find blocks around selected block
@@ -140,19 +145,32 @@ export default {
       } else {
         this.$notify({
           title: 'Warning',
-          message: `Your block is ontop another block`,
+          message: `You can't place blocks on-top of each other`,
           type: 'warning'
         })
       }
     },
     joinRoom: function () {
-      roomService.join({roomId: this.roomId, userId: window.localStorage.getItem('userId')}).then(res => {
+      roomService.join({
+        roomId: this.roomId,
+        userId: window.localStorage.getItem('userId')
+      }).then(res => {
         window.localStorage.setItem('userId', res.data.player._id)
         this.player = {
           id: res.data.player._id,
           team: res.data.player.team
         }
         this.blocks = res.data.room.blocks
+      })
+    },
+    leaveRoom: async function () {
+      await this.$confirm('Are you sure you want to leave?', 'Warning', {
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
+        center: true
+      }).then(() => {
+        this.$router.push({ path: `/` })
       })
     },
     findNearbyBlocks: function (block) {
@@ -186,10 +204,13 @@ export default {
     },
     rotateBlock: function (selectedBlock) {
       const rotateBlock = this.blocks.find(x => x._id === selectedBlock._id)
-      rotateBlock.pieces = rotateBlock.pieces.map((p) => ({
-        x: -p.y + rotateBlock.grid.y + 1,
-        y: p.x
-      }))
+      rotateBlock.pieces = rotateBlock.pieces.map((p) => {
+        rotateBlock.grid = { y: rotateBlock.grid.x, x: rotateBlock.grid.y }
+        return {
+          x: -p.y + rotateBlock.grid.y + 1,
+          y: p.x - rotateBlock.grid.x + 1
+        }
+      })
     },
     flipBlock: function (selectedBlock) {
       const rotateBlock = this.blocks.find(x => x._id === selectedBlock._id)
