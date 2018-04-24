@@ -75,10 +75,10 @@ export default {
     }, false)
 
     document.addEventListener('keydown', (event) => {
-      if (this.activeBlock && (event.keyCode === 39 || event.keyCode === 37)) {
+      if (this.activeBlock && (event.keyCode === 39 || event.keyCode === 37 || event.keyCode === 82)) {
         console.log('rotate')
         this.rotateBlock(this.activeBlock)
-      } else if (this.activeBlock && (event.keyCode === 38 || event.keyCode === 40)) {
+      } else if (this.activeBlock && (event.keyCode === 38 || event.keyCode === 40 || event.keyCode === 70)) {
         console.log('flip')
         this.flipBlock(this.activeBlock)
       }
@@ -204,19 +204,17 @@ export default {
     },
     rotateBlock: function (selectedBlock) {
       const rotateBlock = this.blocks.find(x => x._id === selectedBlock._id)
-      rotateBlock.pieces = rotateBlock.pieces.map((p) => {
-        rotateBlock.grid = { y: rotateBlock.grid.x, x: rotateBlock.grid.y }
-        return {
-          x: -p.y + rotateBlock.grid.y + 1,
-          y: p.x - rotateBlock.grid.x + 1
-        }
-      })
+      rotateBlock.pieces = rotateBlock.pieces.map((p) => ({
+        x: p.y,
+        y: -p.x + rotateBlock.grid.x + 1
+      }))
+      rotateBlock.grid = { y: rotateBlock.grid.x, x: rotateBlock.grid.y }
     },
     flipBlock: function (selectedBlock) {
       const rotateBlock = this.blocks.find(x => x._id === selectedBlock._id)
       rotateBlock.pieces = rotateBlock.pieces.map((p) => ({
-        x: -p.y + rotateBlock.grid.x + 1,
-        y: -p.x + rotateBlock.grid.x + 1
+        x: -p.x + rotateBlock.grid.x + 1,
+        y: p.y
       }))
     }
   },
