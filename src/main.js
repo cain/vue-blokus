@@ -6,9 +6,10 @@ import 'element-ui/lib/theme-chalk/index.css'
 import App from './App'
 import router from './router'
 import VueSocketio from 'vue-socket.io'
+import config from './config'
 
 Vue.config.productionTip = false
-Vue.use(VueSocketio, 'http://localhost:3000')
+Vue.use(VueSocketio, config.SOCKET_URL)
 Vue.use(ElementUI)
 
 /* eslint-disable no-new */
