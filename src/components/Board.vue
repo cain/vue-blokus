@@ -76,9 +76,11 @@ export default {
 
     document.addEventListener('keydown', (event) => {
       if (this.activeBlock && (event.keyCode === 39 || event.keyCode === 37 || event.keyCode === 82)) {
+        event.preventDefault()
         console.log('rotate')
         this.rotateBlock(this.activeBlock)
       } else if (this.activeBlock && (event.keyCode === 38 || event.keyCode === 40 || event.keyCode === 70)) {
+        event.preventDefault()
         console.log('flip')
         this.flipBlock(this.activeBlock)
       }
@@ -243,25 +245,25 @@ $block-size: 20px;
 }
 
 .board {
-  outline: 1px solid #ebebeb;
+  outline: 1px solid grey;
   outline-offset: -1px;
-  box-shadow: 0px 0px 21px -4px rgba(168, 168, 168, 0.75);
+  box-shadow: 0px 0px 21px -4px rgba(168, 168, 168, 1);
   background-size: 20px 20px;
   position: absolute;
   background-image: linear-gradient(to right, #e7e7e7 1px, transparent 1px), linear-gradient(to bottom, #e7e7e7 1px, transparent 1px);
 
   // Board colour corners
   .row:last-child .grid:last-child {
-    background: rgba(255, 0, 0, 0.45);
+    // background: rgba(255, 0, 0, 0.45);
   }
   .row:last-child .grid:first-child {
-    background: rgba(255, 255, 0, 0.45);
+    // background: rgba(255, 255, 0, 0.45);
   }
   .row:first-child .grid:first-child {
-    background: rgba(0, 255, 0, 0.45);
+    // background: rgba(0, 255, 0, 0.45);
   }
   .row:first-child .grid:last-child {
-    background: rgba(0, 0, 255, 0.45);
+    // background: rgba(0, 0, 255, 0.45);
   }
 }
 

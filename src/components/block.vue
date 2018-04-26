@@ -4,7 +4,7 @@
   :class="{ [team]: true }"
   @click="onClick(block)"
   v-bind:style="blockPosition">
-    <div class="block-id">{{ block._id.slice(block._id.length - 3, block._id.length) }}</div>
+    <!-- <div class="block-id">{{ block._id.slice(block._id.length - 3, block._id.length) }}</div> -->
     <div class="helper" v-bind:style="helperStyling"></div>
       <div
       class="piece"
@@ -56,7 +56,7 @@ export default {
   }
   .helper {
     position: absolute;
-    outline: 1px solid rgba(255,0,0,0.2);
+    // outline: 1px solid rgba(255,0,0,0.2);
     background-size: 20px 20px;
     // background-image: linear-gradient(to right, #e7e7e7 1px, transparent 1px), linear-gradient(to bottom, #e7e7e7 1px, transparent 1px);
   }
@@ -79,9 +79,9 @@ export default {
     font-size: 8px;
     max-width: $block-size;
     position: absolute;
-    outline: 1px solid rgba(255, 255, 255, 1);
+    outline: 1px solid rgba(255, 255, 255,1);
     outline-offset: -1px;
-    border-radius: 8px;
+    border-radius: 7px;
     // box-shadow: 0px 0px 21px -4px rgba(0,0,0,1);
   }
 </style>
