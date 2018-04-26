@@ -56,6 +56,11 @@ export default {
     blockMove: function (res) {
       console.log('SOCKET SERVER BLOCK MOVE', res)
       this.moveBlock(res.block)
+    },
+    blockEdit: function (res) {
+      const blockToEdit = this.blocks.find(x => x._id === res.block._id)
+      blockToEdit.grid = res.block.grid
+      blockToEdit.pieces = res.block.pieces
     }
   },
   data () {
@@ -79,10 +84,12 @@ export default {
         event.preventDefault()
         console.log('rotate')
         this.rotateBlock(this.activeBlock)
+        this.$socket.emit('block_edit', {block: this.activeBlock, roomId: this.roomId, userId: window.localStorage.getItem('userId')})
       } else if (this.activeBlock && (event.keyCode === 38 || event.keyCode === 40 || event.keyCode === 70)) {
         event.preventDefault()
         console.log('flip')
         this.flipBlock(this.activeBlock)
+        this.$socket.emit('block_edit', {block: this.activeBlock, roomId: this.roomId, userId: window.localStorage.getItem('userId')})
       }
     })
   },
