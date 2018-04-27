@@ -75,8 +75,8 @@ export default {
   },
   mounted () {
     this.joinRoom()
-    document.addEventListener('mousemove', () => {
-      this.mouseController()
+    document.addEventListener('mousemove', (e) => {
+      this.mouseController(e)
     }, false)
 
     document.addEventListener('keydown', (event) => {
@@ -94,10 +94,10 @@ export default {
     })
   },
   methods: {
-    mouseController: function () {
+    mouseController: function (e) {
       if (this.activeBlock) {
         // Calculate grid positioning
-        const mouse = this.mousePosition()
+        const mouse = this.mousePosition(e)
         const x = Math.round(mouse.x / config.GRID_SIZE)
         const y = Math.round(mouse.y / config.GRID_SIZE)
         const activeBlock = this.blocks.find(x => x._id === this.activeBlock._id)

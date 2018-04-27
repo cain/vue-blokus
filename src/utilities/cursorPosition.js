@@ -1,4 +1,4 @@
-export default function () {
+export default function (event) {
   var eventDoc
   var doc
   var body
@@ -18,6 +18,5 @@ export default function () {
       ((doc && doc.scrollTop) || (body && body.scrollTop) || 0) -
       ((doc && doc.clientTop) || (body && body.clientTop) || 0)
   }
-
   return { x: event.pageX, y: event.pageY }
 }
