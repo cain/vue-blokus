@@ -2,21 +2,23 @@
     <el-row>
       <el-row>
         <el-col class="text-center" :span="24">
-          <small style="color: #606262; margin-top: 100px; width: 100%">Made by <a target="_blank" href="https://github.com/cainhall">cain</a>, source code <a target="_blank" href="https://github.com/cainhall/vue-blokus">github</a></small>
+          <div class="logo">
+            <img draggable="false" width="20px" class="emoji" alt="🅱" src="https://twemoji.maxcdn.com/2/72x72/1f171.png">
+          </div>
           <h2>
             Blokus
           </h2>
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="16" :offset="4">
+        <el-col :span="24">
           <el-table
           :data="rooms"
-          style="">
+          style="max-width: 700px; margin:auto;">
             <el-table-column
               label="Name">
               <template slot-scope="scope">
-                {{scope.row._id}}
+                {{scope.row.name}}
               </template>
             </el-table-column>
             <el-table-column
@@ -30,7 +32,7 @@
               label="Last Update">
               <template slot-scope="scope">
                 <i class="el-icon-time"></i>
-                5 minutes ago
+                {{ fromAgo(scope.row.updatedAt) }} ago
               </template>
             </el-table-column>
             <el-table-column
@@ -49,7 +51,10 @@
       <el-row class="text-center">
         <el-col :span="24">
           <p>OR</p>
-          <el-button @click="createRoom" size="mini">Create Room</el-button>
+          <el-button @click="createRoomPrompt" size="mini">Create Room</el-button>
+        </el-col>
+        <el-col style="margin-top: 18px;" :span="24">
+          <small style="color: #606262; margin-top: 100px; width: 100%">Made by <a target="_blank" href="https://github.com/cain">cain</a>, source code <a target="_blank" href="https://github.com/cain/vue-blokus">github</a></small>
         </el-col>
      </el-row>
      <el-footer class="text-center">
@@ -59,12 +64,12 @@
 
 <script>
 import RoomService from '../services/room.service'
+import { setItem, getItem } from '../utilities/localStorage'
+import { distanceInWordsStrict } from 'date-fns'
 
 export default {
   data () {
     return {
-      roomInput: '',
-      responseMessage: '',
       rooms: []
     }
   },
@@ -72,26 +77,54 @@ export default {
     this.getRooms()
   },
   methods: {
-    joinRoom: function (id) {
-      RoomService.join({roomId: id, userId: window.localStorage.getItem('userId')}).then(res => {
-        window.localStorage.setItem('userId', res.data.player._id)
-        this.$router.push({ path: `/room/${res.data.room._id}` })
-      }).catch(e => { this.responseMessage = {...e}.response.data.message })
+    fromAgo: function (date) {
+      return distanceInWordsStrict(date, new Date())
     },
-    createRoom: function () {
-      RoomService.create().then(res => {
-        window.localStorage.setItem('userId', res.data.userId)
+    joinRoom: function (id) {
+      RoomService.join({roomId: id, userId: getItem('userId')}).then(res => {
+        setItem('userId', res.data.player._id)
+        this.$message({ type: 'success', message: 'You have joined a room' })
         this.$router.push({ path: `/room/${res.data.room._id}` })
-      }).catch(e => { this.responseMessage = {...e}.response.data.message })
+      }).catch(e => {
+        this.$message({ type: 'error', message: e })
+      })
+    },
+    createRoom: function (roomName) {
+      RoomService.create(roomName).then(res => {
+        setItem('userId', res.data.userId)
+        this.$router.push({ path: `/room/${res.data.room._id}` })
+        this.$message({
+          type: 'success',
+          message: 'You have created a room'
+        })
+      }).catch(e => {
+        this.$message({ type: 'error', message: e })
+      })
     },
     getRooms: function () {
       RoomService.getAll().then(res => {
         this.rooms = res.data.rooms
-      }).catch(e => { this.responseMessage = {...e}.response.data.message })
+      }).catch(e => {
+        this.$message({ type: 'error', message: e })
+      })
+    },
+    createRoomPrompt: function () {
+      this.$prompt('', 'Enter a room name', {
+        confirmButtonText: 'OK',
+        center: true,
+        cancelButtonText: 'Cancel'
+      }).then(res => {
+        this.createRoom(res.value)
+      })
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.logo {
+    font-weight: 800;
+    margin: auto;
+    margin-top: 18px;
+}
 </style>

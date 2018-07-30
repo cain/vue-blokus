@@ -1,6 +1,7 @@
 # vue-blokus
+A Multiplayer board game based off the game blokus!
 
-> A Vue.js project
+![Design](https://github.com/cain/vue-blokus/blob/dev/design.png)
 
 ## Build Setup
 

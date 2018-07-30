@@ -1,32 +1,40 @@
 <template>
-  <div class="block"
+  <div
+  class="block"
+  :class="{ [team]: true }"
   @click="onClick(block)"
-  v-bind:style="{ top: `${block.y * GRID_SIZE}px`, left: `${block.x * GRID_SIZE}px`}">
-    <div class="block-id">{{ block._id.slice(block._id.length - 3, block._id.length) }}</div>
-    <div class="helper" v-bind:style="{ width: `${(block.grid.x + 2) * GRID_SIZE}px`, height: `${(block.grid.y + 2) * GRID_SIZE}px`, left: `-${((block.grid.x + 2) * GRID_SIZE) / 2 - ((block.grid.x / 2) * GRID_SIZE)}px`, top: `-${((block.grid.y + 1) * GRID_SIZE)}px`}"></div>
-    <div
-    class="piece"
-    v-for="piece in block.pieces"
-    v-bind:key="block.id + 'x' + piece.x + 'y' + piece.y"
-    v-bind:style="{ left: `${(piece.x - 1) * GRID_SIZE}px`, bottom: `${(piece.y - 1) * GRID_SIZE}px`, background: teamColour }"
-    >
-    </div>
+  v-bind:style="blockPosition">
+    <!-- <div class="block-id">{{ block._id.slice(block._id.length - 3, block._id.length) }}</div> -->
+    <div class="helper" v-bind:style="helperStyling"></div>
+      <div
+      class="piece"
+      v-for="piece in block.pieces"
+      v-bind:key="block.id + 'x' + piece.x + 'y' + piece.y"
+      v-bind:style="{ left: `${(piece.x - 1) * GRID_SIZE}px`, bottom: `${(piece.y - 1) * GRID_SIZE}px` }"
+      >
+      </div>
   </div>
 </template>
 
 <script>
-const teamColours = {
-  'RED': '#F56C6C',
-  'BLUE': '#409EFF',
-  'YELLOW': '#E6A23C',
-  'GREEN': '#67C23A'
-}
 export default {
   name: 'block',
   props: ['block', 'GRID_SIZE', 'onClick', 'team'],
   computed: {
-    teamColour: function () {
-      return teamColours[this.team]
+    blockPosition: function () {
+      return {
+        top: `${this.block.y * this.GRID_SIZE}px`,
+        left: `${this.block.x * this.GRID_SIZE}px`
+      }
+    },
+    helperStyling: function () {
+      const { x, y } = this.block.grid
+      return {
+        width: `${(x + 2) * this.GRID_SIZE}px`,
+        height: `${(y + 2) * this.GRID_SIZE}px`,
+        left: `-${((x + 2) * this.GRID_SIZE) / 2 - ((x / 2) * this.GRID_SIZE)}px`,
+        top: `-${((y + 1) * this.GRID_SIZE)}px`
+      }
     }
   }
 }
@@ -34,9 +42,21 @@ export default {
 
 <style lang="scss">
   $block-size: 20px;
+  .RED .piece {
+    background: #F56C6C;
+  }
+  .BLUE .piece {
+    background: #409EFF;
+  }
+  .YELLOW .piece {
+    background: #E6A23C;
+  }
+  .GREEN .piece {
+    background: #67C23A;
+  }
   .helper {
     position: absolute;
-    outline: 1px solid rgba(255,0,0,0.2);
+    // outline: 1px solid rgba(255,0,0,0.2);
     background-size: 20px 20px;
     // background-image: linear-gradient(to right, #e7e7e7 1px, transparent 1px), linear-gradient(to bottom, #e7e7e7 1px, transparent 1px);
   }
@@ -59,8 +79,9 @@ export default {
     font-size: 8px;
     max-width: $block-size;
     position: absolute;
-    outline: 1px solid rgba(255, 255, 255, 0.2);
-    outline-offset: -2px;
+    outline: 1px solid rgba(255, 255, 255,1);
+    outline-offset: -1px;
+    border-radius: 7px;
     // box-shadow: 0px 0px 21px -4px rgba(0,0,0,1);
   }
 </style>

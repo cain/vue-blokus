@@ -5,7 +5,8 @@
       <!-- Player information -->
       <div class="player-info">
         Player ID: {{ player.id }} <br />
-        Team: {{ player.team }}
+        Team: {{ player.team }} <br />
+        <button @click="leaveRoom()">leave game</button>
       </div>
 
       <!-- Click Overlay -->
@@ -35,12 +36,12 @@
 </template>
 
 <script>
+import intersectionWith from 'lodash/intersectionWith'
+import isEqual from 'lodash/isEqual'
 import cursorPosition from '../utilities/cursorPosition'
 import roomService from '../services/room.service'
 import block from './block'
 import config from '../config'
-const intersectionWith = require('lodash/intersectionWith')
-const isEqual = require('lodash/isEqual')
 
 export default {
   name: 'Board',
@@ -55,6 +56,11 @@ export default {
     blockMove: function (res) {
       console.log('SOCKET SERVER BLOCK MOVE', res)
       this.moveBlock(res.block)
+    },
+    blockEdit: function (res) {
+      const blockToEdit = this.blocks.find(x => x._id === res.block._id)
+      blockToEdit.grid = res.block.grid
+      blockToEdit.pieces = res.block.pieces
     }
   },
   data () {
@@ -64,29 +70,34 @@ export default {
       rows: Array.apply(null, Array(20)).map(function (x, i) { return i }),
       cols: Array.apply(null, Array(20)).map(function (x, i) { return i }),
       activeBlock: false,
-      board: [],
       player: {}
     }
   },
   mounted () {
     this.joinRoom()
-    document.addEventListener('mousemove', () => {
-      this.controller()
+    document.addEventListener('mousemove', (e) => {
+      this.mouseController(e)
     }, false)
 
     document.addEventListener('keydown', (event) => {
-      if (this.activeBlock && (event.keyCode === 39 || event.keyCode === 37)) {
+      if (this.activeBlock && (event.keyCode === 39 || event.keyCode === 37 || event.keyCode === 82)) {
+        event.preventDefault()
+        console.log('rotate')
         this.rotateBlock(this.activeBlock)
-      } else if (this.activeBlock && (event.keyCode === 38 || event.keyCode === 40)) {
+        this.$socket.emit('block_edit', {block: this.activeBlock, roomId: this.roomId, userId: window.localStorage.getItem('userId')})
+      } else if (this.activeBlock && (event.keyCode === 38 || event.keyCode === 40 || event.keyCode === 70)) {
+        event.preventDefault()
+        console.log('flip')
         this.flipBlock(this.activeBlock)
+        this.$socket.emit('block_edit', {block: this.activeBlock, roomId: this.roomId, userId: window.localStorage.getItem('userId')})
       }
     })
   },
   methods: {
-    controller: function () {
+    mouseController: function (e) {
       if (this.activeBlock) {
         // Calculate grid positioning
-        const mouse = this.mousePosition()
+        const mouse = this.mousePosition(e)
         const x = Math.round(mouse.x / config.GRID_SIZE)
         const y = Math.round(mouse.y / config.GRID_SIZE)
         const activeBlock = this.blocks.find(x => x._id === this.activeBlock._id)
@@ -125,11 +136,14 @@ export default {
     getBlockGrid: function (el) {
       el = el.getBoundingClientRect()
       return {
-        left: (el.left + window.scrollX) / config.GRID_SIZE,
-        right: (el.right) / config.GRID_SIZE,
-        bottom: (el.bottom) / config.GRID_SIZE,
-        top: (el.top + window.scrollY) / config.GRID_SIZE
+        left: this.divideByGrid(el.left + window.scrollX),
+        right: this.divideByGrid(el.right),
+        bottom: this.divideByGrid(el.bottom),
+        top: this.divideByGrid(el.top + window.scrollY)
       }
+    },
+    divideByGrid: function (val) {
+      return val / config.GRID_SIZE
     },
     unselect: function () {
       // find blocks around selected block
@@ -140,19 +154,32 @@ export default {
       } else {
         this.$notify({
           title: 'Warning',
-          message: `Your block is ontop another block`,
+          message: `You can't place blocks on-top of each other`,
           type: 'warning'
         })
       }
     },
     joinRoom: function () {
-      roomService.join({roomId: this.roomId, userId: window.localStorage.getItem('userId')}).then(res => {
+      roomService.join({
+        roomId: this.roomId,
+        userId: window.localStorage.getItem('userId')
+      }).then(res => {
         window.localStorage.setItem('userId', res.data.player._id)
         this.player = {
           id: res.data.player._id,
           team: res.data.player.team
         }
         this.blocks = res.data.room.blocks
+      })
+    },
+    leaveRoom: async function () {
+      await this.$confirm('Are you sure you want to leave?', 'Warning', {
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
+        center: true
+      }).then(() => {
+        this.$router.push({ path: `/` })
       })
     },
     findNearbyBlocks: function (block) {
@@ -187,15 +214,16 @@ export default {
     rotateBlock: function (selectedBlock) {
       const rotateBlock = this.blocks.find(x => x._id === selectedBlock._id)
       rotateBlock.pieces = rotateBlock.pieces.map((p) => ({
-        x: -p.y + rotateBlock.grid.y + 1,
-        y: p.x
+        x: p.y,
+        y: -p.x + rotateBlock.grid.x + 1
       }))
+      rotateBlock.grid = { y: rotateBlock.grid.x, x: rotateBlock.grid.y }
     },
     flipBlock: function (selectedBlock) {
       const rotateBlock = this.blocks.find(x => x._id === selectedBlock._id)
       rotateBlock.pieces = rotateBlock.pieces.map((p) => ({
-        x: -p.y + rotateBlock.grid.x + 1,
-        y: -p.x + rotateBlock.grid.x + 1
+        x: -p.x + rotateBlock.grid.x + 1,
+        y: p.y
       }))
     }
   },
@@ -208,8 +236,8 @@ export default {
 <style lang="scss" scoped >
 $block-size: 20px;
 .container {
-    height: 100vh;
-    width: 100vw;
+    height: 2000px;
+    width: 2000px;
     position: relative;
 }
 .grid {
@@ -224,25 +252,25 @@ $block-size: 20px;
 }
 
 .board {
-  outline: 1px solid #ebebeb;
+  outline: 1px solid grey;
   outline-offset: -1px;
-  box-shadow: 0px 0px 21px -4px rgba(168, 168, 168, 0.75);
+  box-shadow: 0px 0px 21px -4px rgba(168, 168, 168, 1);
   background-size: 20px 20px;
   position: absolute;
   background-image: linear-gradient(to right, #e7e7e7 1px, transparent 1px), linear-gradient(to bottom, #e7e7e7 1px, transparent 1px);
 
   // Board colour corners
   .row:last-child .grid:last-child {
-    background: rgba(255, 0, 0, 0.45);
+    // background: rgba(255, 0, 0, 0.45);
   }
   .row:last-child .grid:first-child {
-    background: rgba(255, 255, 0, 0.45);
+    // background: rgba(255, 255, 0, 0.45);
   }
   .row:first-child .grid:first-child {
-    background: rgba(0, 255, 0, 0.45);
+    // background: rgba(0, 255, 0, 0.45);
   }
   .row:first-child .grid:last-child {
-    background: rgba(0, 0, 255, 0.45);
+    // background: rgba(0, 0, 255, 0.45);
   }
 }
 
