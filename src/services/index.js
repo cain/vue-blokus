@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { API_URL } from '../config'
+const API_URL = process.env.API_URL
 
 export default function (type, route, data) {
   return new Promise(function (resolve, reject) {

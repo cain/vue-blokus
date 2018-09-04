@@ -41,7 +41,7 @@ import isEqual from 'lodash/isEqual'
 import cursorPosition from '../utilities/cursorPosition'
 import roomService from '../services/room.service'
 import block from './block'
-import config from '../config'
+import { GRID_SIZE } from '../../config'
 
 export default {
   name: 'Board',
@@ -65,7 +65,7 @@ export default {
   },
   data () {
     return {
-      GRID_SIZE: config.GRID_SIZE,
+      GRID_SIZE: GRID_SIZE,
       blocks: [],
       rows: Array.apply(null, Array(20)).map(function (x, i) { return i }),
       cols: Array.apply(null, Array(20)).map(function (x, i) { return i }),
@@ -98,8 +98,8 @@ export default {
       if (this.activeBlock) {
         // Calculate grid positioning
         const mouse = this.mousePosition(e)
-        const x = Math.round(mouse.x / config.GRID_SIZE)
-        const y = Math.round(mouse.y / config.GRID_SIZE)
+        const x = Math.round(mouse.x / GRID_SIZE)
+        const y = Math.round(mouse.y / GRID_SIZE)
         const activeBlock = this.blocks.find(x => x._id === this.activeBlock._id)
         // Trigger ONLY on grid change
         if (x === activeBlock.x && y === activeBlock.y) {
@@ -143,7 +143,7 @@ export default {
       }
     },
     divideByGrid: function (val) {
-      return val / config.GRID_SIZE
+      return val / GRID_SIZE
     },
     unselect: function () {
       // find blocks around selected block

@@ -5,6 +5,7 @@
 const path = require('path')
 
 module.exports = {
+  GRID_SIZE: 20,
   dev: {
 
     // Paths
