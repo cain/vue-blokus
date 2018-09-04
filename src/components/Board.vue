@@ -41,7 +41,8 @@ import isEqual from 'lodash/isEqual'
 import cursorPosition from '../utilities/cursorPosition'
 import roomService from '../services/room.service'
 import block from './block'
-import config from '../config'
+import { GRID_SIZE } from '../../config'
+const userId = window.localStorage.getItem('userId')
 
 export default {
   name: 'Board',
@@ -52,6 +53,9 @@ export default {
   sockets: {
     connected: function () {
       console.log('socket connected')
+    },
+    disconnected: function () {
+      console.log('socket disconnected')
     },
     blockMove: function (res) {
       console.log('SOCKET SERVER BLOCK MOVE', res)
@@ -65,7 +69,7 @@ export default {
   },
   data () {
     return {
-      GRID_SIZE: config.GRID_SIZE,
+      GRID_SIZE: GRID_SIZE,
       blocks: [],
       rows: Array.apply(null, Array(20)).map(function (x, i) { return i }),
       cols: Array.apply(null, Array(20)).map(function (x, i) { return i }),
@@ -80,16 +84,13 @@ export default {
     }, false)
 
     document.addEventListener('keydown', (event) => {
-      if (this.activeBlock && (event.keyCode === 39 || event.keyCode === 37 || event.keyCode === 82)) {
+      if (!this.activeBlock) return
+      if ((event.keyCode === 39 || event.keyCode === 37 || event.keyCode === 82)) {
         event.preventDefault()
-        console.log('rotate')
         this.rotateBlock(this.activeBlock)
-        this.$socket.emit('block_edit', {block: this.activeBlock, roomId: this.roomId, userId: window.localStorage.getItem('userId')})
-      } else if (this.activeBlock && (event.keyCode === 38 || event.keyCode === 40 || event.keyCode === 70)) {
+      } else if ((event.keyCode === 38 || event.keyCode === 40 || event.keyCode === 70)) {
         event.preventDefault()
-        console.log('flip')
         this.flipBlock(this.activeBlock)
-        this.$socket.emit('block_edit', {block: this.activeBlock, roomId: this.roomId, userId: window.localStorage.getItem('userId')})
       }
     })
   },
@@ -98,8 +99,8 @@ export default {
       if (this.activeBlock) {
         // Calculate grid positioning
         const mouse = this.mousePosition(e)
-        const x = Math.round(mouse.x / config.GRID_SIZE)
-        const y = Math.round(mouse.y / config.GRID_SIZE)
+        const x = Math.round(mouse.x / GRID_SIZE)
+        const y = Math.round(mouse.y / GRID_SIZE)
         const activeBlock = this.blocks.find(x => x._id === this.activeBlock._id)
         // Trigger ONLY on grid change
         if (x === activeBlock.x && y === activeBlock.y) {
@@ -108,7 +109,7 @@ export default {
         // Set selectedBlock axis
         activeBlock.x = x
         activeBlock.y = y
-        this.$socket.emit('block_move', {block: activeBlock, roomId: this.roomId, userId: window.localStorage.getItem('userId')})
+        this.$socket.emit('block_move', {block: activeBlock, roomId: this.roomId, userId})
       }
     },
     moveBlock: function (block) {
@@ -143,7 +144,7 @@ export default {
       }
     },
     divideByGrid: function (val) {
-      return val / config.GRID_SIZE
+      return val / GRID_SIZE
     },
     unselect: function () {
       // find blocks around selected block
@@ -218,6 +219,7 @@ export default {
         y: -p.x + rotateBlock.grid.x + 1
       }))
       rotateBlock.grid = { y: rotateBlock.grid.x, x: rotateBlock.grid.y }
+      this.$socket.emit('block_edit', {block: this.activeBlock, roomId: this.roomId, userId})
     },
     flipBlock: function (selectedBlock) {
       const rotateBlock = this.blocks.find(x => x._id === selectedBlock._id)
@@ -225,6 +227,7 @@ export default {
         x: -p.x + rotateBlock.grid.x + 1,
         y: p.y
       }))
+      this.$socket.emit('block_edit', {block: this.activeBlock, roomId: this.roomId, userId})
     }
   },
   computed: {
@@ -241,10 +244,10 @@ $block-size: 20px;
     position: relative;
 }
 .grid {
-  min-width: $block-size;
-  min-height: $block-size;
+  width: $block-size;
+  height: $block-size;
   font-size: 7px;
-  display: inline;
+  display: inline-block;
 }
 
 .dragging {
@@ -255,22 +258,22 @@ $block-size: 20px;
   outline: 1px solid grey;
   outline-offset: -1px;
   box-shadow: 0px 0px 21px -4px rgba(168, 168, 168, 1);
-  background-size: 20px 20px;
+  background-size: $block-size $block-size;
   position: absolute;
   background-image: linear-gradient(to right, #e7e7e7 1px, transparent 1px), linear-gradient(to bottom, #e7e7e7 1px, transparent 1px);
 
   // Board colour corners
   .row:last-child .grid:last-child {
-    // background: rgba(255, 0, 0, 0.45);
+    background: rgba(255, 0, 0, 0.45);
   }
   .row:last-child .grid:first-child {
-    // background: rgba(255, 255, 0, 0.45);
+    background: rgba(255, 255, 0, 0.45);
   }
   .row:first-child .grid:first-child {
-    // background: rgba(0, 255, 0, 0.45);
+    background: rgba(0, 255, 0, 0.45);
   }
   .row:first-child .grid:last-child {
-    // background: rgba(0, 0, 255, 0.45);
+    background: rgba(0, 0, 255, 0.45);
   }
 }
 
