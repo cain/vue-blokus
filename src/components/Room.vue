@@ -25,6 +25,8 @@ export default {
       console.log('socket disconnected')
     },
     roomJoined: function (res) {
+      console.log('room joined', res.status)
+
       res.player = this.player
       switch (res.status) {
         case 'select': this.playerSelect(); break
@@ -72,7 +74,7 @@ export default {
         center: true
       }).then(() => {
         // choose nickname and colour here
-        this.$socket.emit('player_connect', { room: this.roomId, userId, colour: 'red', nickName: 'Cain' })
+        this.$socket.emit('player_connect', { room: this.$route.params.id, userId, colour: 'red', nickName: 'Cain' })
       })
     },
     leaveRoom: async function () {
