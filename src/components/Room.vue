@@ -25,7 +25,7 @@ export default {
       console.log('socket disconnected')
     },
     roomJoined: function (res) {
-      console.log('room joined', res.status)
+      console.log('room joined', res)
 
       res.player = this.player
       switch (res.status) {
@@ -34,10 +34,6 @@ export default {
         case 'full': this.spectate(); break
         default: this.kick()
       }
-    },
-    playerJoined: function (res) {
-      console.log('played joined!', res.player)
-      this.players = res.players
     }
   },
   data () {
@@ -66,15 +62,16 @@ export default {
       // })
     },
     playerSelect: function () {
+      // window.localStorage.setItem('userId', this.player.id)
       console.log('playerselect')
-      this.$confirm('Are you sure you want to join', 'Info', {
+      this.$confirm('Team Selection here', 'Info', {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
         center: true
       }).then(() => {
         // choose nickname and colour here
-        this.$socket.emit('player_connect', { room: this.$route.params.id, userId, colour: 'red', nickName: 'Cain' })
+        this.$socket.emit('player_connect', { roomId: this.$route.params.id, userId, colour: 'red', nickName: 'Cain' })
       })
     },
     leaveRoom: async function () {

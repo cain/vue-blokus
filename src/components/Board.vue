@@ -53,7 +53,10 @@ export default {
       blockToEdit.pieces = res.block.pieces
     },
     playerJoined: function (res) {
-      console.log('played joined board!', res.player)
+      console.log('played joined board!', res)
+      this.blocks = res.room.blocks
+    },
+    roomJoined: function (res) {
       this.blocks = res.room.blocks
     }
   },
