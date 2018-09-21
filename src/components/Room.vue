@@ -27,7 +27,8 @@ export default {
     roomJoined: function (res) {
       console.log('room joined', res)
 
-      res.player = this.player
+      this.player = res.player
+      window.localStorage.setItem('userId', this.player._id)
       switch (res.status) {
         case 'select': this.playerSelect(); break
         case 'joined': this.joinGame(); break
